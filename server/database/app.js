@@ -69,7 +69,15 @@ app.get('/fetchDealers', async (req, res) => {
 
 // Express route to fetch Dealers by a particular state
 app.get('/fetchDealers/:state', async (req, res) => {
-//Write your code here
+  try {
+    const documents = await Dealerships.find({
+      state: { $regex: new RegExp('^' + req.params.state + '$', 'i') }
+    }).lean();
+    res.status(200).json(documents);
+  } catch (err) {
+    console.error('fetchDealers by state error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Express route to fetch dealer by a particular id
