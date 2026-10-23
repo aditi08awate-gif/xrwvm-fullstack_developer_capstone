@@ -63,3 +63,10 @@ def login_user(request):
 # Create a `add_review` view to submit a review
 # def add_review(request):
 # ...
+
+from django.contrib.auth import logout
+
+@csrf_exempt
+def logout_user(request):
+    logout(request)
+    return JsonResponse({"status": "Logged out"})
