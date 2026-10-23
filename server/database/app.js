@@ -10,6 +10,7 @@ app.use(require('body-parser').urlencoded({ extended: false }));
 
 const reviews_data = JSON.parse(fs.readFileSync("reviews.json", 'utf8'));
 const dealerships_data = JSON.parse(fs.readFileSync("dealerships.json", 'utf8'));
+const cars_data = JSON.parse(fs.readFileSync("car_records.json", 'utf8'));
 
 mongoose.connect("mongodb://mongo_db:27017/",{'dbName':'dealershipsDB'});
 
@@ -17,6 +18,7 @@ mongoose.connect("mongodb://mongo_db:27017/",{'dbName':'dealershipsDB'});
 const Reviews = require('./review');
 
 const Dealerships = require('./dealership');
+const Cars = require('./inventory');
 
 try {
   Reviews.deleteMany({}).then(()=>{
@@ -24,6 +26,9 @@ try {
   });
   Dealerships.deleteMany({}).then(()=>{
     Dealerships.insertMany(dealerships_data['dealerships']);
+  });
+  Cars.deleteMany({}).then(()=>{
+    Cars.insertMany(cars_data['cars']);
   });
   
 } catch (error) {
@@ -118,6 +123,18 @@ app.post('/insert_review', express.raw({ type: '*/*' }), async (req, res) => {
   } catch (error) {
 		console.log(error);
     res.status(500).json({ error: 'Error inserting review' });
+  }
+});
+
+
+// Fetch all car makes and models
+app.get('/fetchCars', async (req, res) => {
+  try {
+    const documents = await Cars.find({}, { _id: 0, make: 1, model: 1 }).lean();
+    res.status(200).json(documents);
+  } catch (err) {
+    console.error('fetchCars error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
